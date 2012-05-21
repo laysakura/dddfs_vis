@@ -38,17 +38,33 @@ app.listen(8124, function(){
 
 
 // ===========================================
+// Utility functions
+var log = console.log;
 
+
+// Requires
+var md = require('./public/javascripts/metadata.js');
 var fs = require('fs');
 
 
-var mdInfo; // This value is sent to clients
+// Startup logging
+log ('[Traced Files]');
+log(md.tracedFiles);
+
+
+var mdInfo = {}; // This assosiative array is sent to clients
 var mdInfoPolling = setInterval(function() {
-    var mdPath = '/home/nakatani/dddfs_md_mvmnt'
-    fs.readdir(mdPath, function (err, files) {
-        if (err) throw err;
-        mdInfo = files;
-    })
+    md.tracedFiles.map(function(tracedFile) {
+        fs.readFile(tracedFile, function(err, data) {
+            if (err) throw err;
+            mdInfo[tracedFile] = data.toString();
+        });
+    });
+
+    // fs.readdir(mdDirPath, function (err, files) {
+    //     if (err) throw err;
+    //     mdInfo = files;
+    // });
 }, 1000);
 
 
@@ -59,22 +75,28 @@ var io = socketIO.listen(app);
 
 // クライアントが接続してきたときの処理
 io.sockets.on('connection', function(socket) {
-    console.log("connection");
-    // メッセージを受けたときの処理
-    socket.on('message', function(data) {
-        // つながっているクライアント全員に送信
-        console.log("message");
-        io.sockets.emit('message', { value: data.value });
-    });
+    log("[connection]");
+
+    // socket.on('message', function(data) {
+    //     // つながっているクライアント全員に送信
+    //     log("message");
+    //     io.sockets.emit('message', { value: data.value });
+    // });
 
     // Request for md info
     socket.on('req md info', function(data) {
-        console.log('[MD info Request from ' + data.value + ']');
-        socket.emit('md info', { value: mdInfo });
+        log('[MD info Request from ' + data.value + ']');
+        log(mdInfo);
+        socket.emit('md info', mdInfo);
+        // socket.emit('md info',
+        //             {
+        //                 'traceA': 'mikity-format',
+        //                 'traceB': 'mikity-format2',
+        //             });
     });
 
     // クライアントが切断したときの処理
     socket.on('disconnect', function(){
-        console.log("disconnect");
+        log("[disconnect]");
     });
 });

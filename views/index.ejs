@@ -1,4 +1,5 @@
 <script src="/socket.io/socket.io.js"></script>
+<script src="/javascripts/metadata.js"></script>
 <script type="text/javascript">
 var socket = io.connect('http://localhost:11111');
 socket.on('connect', function(msg) {
@@ -9,29 +10,11 @@ socket.on('connect', function(msg) {
     "接続方式::" + socket.socket.transport.name;
 });
 
-// メッセージを受けたとき
-socket.on('message', function(msg) {
-    // メッセージを画面に表示する
-    // log(document.getElementById("receiveMsg").innerHTML = msg.value;
-    log(msg.value);
-});
-
-// メッセージを送る
-function SendMsg() {
-  var msg = document.getElementById("message").value;
-  // メッセージを発射する
-  socket.emit('message', { value: msg });
-}
-// 切断する
-function DisConnect() {
-  var msg = socket.socket.transport.sessid + "は切断しました。";
-  // メッセージを発射する
-  socket.emit('message', { value: msg });
-  // socketを切断する
-  socket.disconnect();
-}
-
 // ----------------------
+// Requires
+// var md = require('/javascripts/metadata.js');
+
+
 var logDiv;
 window.onload=function(){
     logDiv = document.getElementById("receiveMsg");
@@ -41,14 +24,12 @@ var log = function(){ console.log(arguments);logDiv.innerHTML+=arguments[0]+"<br
 
 // Polling MD info to server
 var pollingToServer = setInterval(function() {
-    // log('[Sending from ' + socket.socket.transport.sessid + ']');
-    // socket.emit('message', { value: 'ping from ' + socket.socket.transport.sessid });
     socket.emit('req md info', { value: socket.socket.transport.sessid });
 }, 1000);
 
 // Receive MD info from server
-socket.on('md info', function(msg) {
-    log(msg.value);
+socket.on('md info', function(mdInfo) {
+    log(mdInfo);
 });
 
 </script>
@@ -57,7 +38,4 @@ socket.on('md info', function(msg) {
 <div id="connectId"></div>
 <div id="type"></div>
 <br>
-<input type="text" id="message" value="">
-<input type="button" value="メッセージを送る" onclick="SendMsg()">
-<input type="button" value="切断する" onclick="DisConnect()">
 <div id="receiveMsg"></div>
