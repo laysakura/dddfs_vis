@@ -56,9 +56,9 @@ log(md.tracedFiles);
 var mdInfo = {}; // This assosiative array is sent to clients
 var mdInfoPolling = setInterval(function() {
     md.tracedFiles.map(function(tracedFile) {
-        fs.readFile(tracedFile, function(err, data) {
+        fs.readFile(tracedFile, 'utf8', function(err, data) {
             if (err) throw err;
-            mdInfo[tracedFile] = data.toString();
+            mdInfo[tracedFile] = data;
         });
     });
 }, 1000);
@@ -77,6 +77,15 @@ io.sockets.on('connection', function(socket) {
     socket.on('req md info init', function(client) {
         log('[MD info Request from ' + client.sessionId + ']');
         socket.emit('md info init', mdInfo);
+    });
+
+    // Process request for iptable
+    socket.on('req iptable', function(client) {
+        log('[Iptable Request from ' + client.sessionId + ']');
+        fs.readFile('./public/json/iptable.json', 'utf8', function(err, data) {
+            if (err) throw err;
+            socket.emit('iptable', eval(JSON.parse(data)));
+        });
     });
 
     // Process request for md info

@@ -17,8 +17,9 @@ socket.on('connect', function(msg) {
 // Start-up
 var log = function() {};
 var readyToReqNewMdInfo = false;
+var iptable = {};
 var mdInfo = {};
-window.onload=function(){
+window.onload = function() {
     // Define log() function
     log = function() {
         console.log(arguments);
@@ -26,12 +27,17 @@ window.onload=function(){
     };
 
     // Send inital message to the server
+    socket.emit('req iptable', {});
     socket.emit('req md info init', {});
 }
+socket.on('iptable', function(_iptable) {
+    // Load table converting IP into ClusterHost
+    iptable = _iptable;
+    // log(iptable['192.58.9.3']['cluster']);
+});
 socket.on('md info init', function(initMdInfo) {
+    // Get the initial file distribution
     mdInfo = initMdInfo;
-    var line = mdInfo['/home/nakatani/dddfs_md_mvmnt/traceA'];
-    log(mdInfoLine2mdInfoHash(line).ip);
     readyToReqNewMdInfo = true;
 });
 
@@ -48,7 +54,15 @@ socket.on('md info', function(newMdInfo) {
     mdInfo = newMdInfo;
     for (var fileName in newMdInfo) {
         log('[Contents of ' + fileName + ']');
-        log(newMdInfo[fileName]);
+        mdInfo[fileName].split('\n').map(function(mdInfoLine) {
+            var mdInfoHash = mdInfoLine2mdInfoHash(mdInfoLine);
+            if (mdInfoHash != undefined) {
+                var ip = mdInfoHash.ip;
+                log(ip + ' = ' + iptable[ip]['cluster'] + iptable[ip]['localId']);
+            }
+        });
+
+        // log(newMdInfo[fileName]);
         log('');
     }
     readyToReqNewMdInfo = true;
