@@ -43,7 +43,7 @@ var log = console.log;
 
 
 // Requires
-var md = require('./public/javascripts/metadata.js');
+var md = require('./public/javascripts/metadata.server.js');
 var fs = require('fs');
 
 

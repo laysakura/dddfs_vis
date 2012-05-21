@@ -1,5 +1,5 @@
 <script src="/socket.io/socket.io.js"></script>
-<script src="/javascripts/metadata.js"></script>
+<script src="/javascripts/metadata.client.js"></script>
 <script type="text/javascript">
 var socket = io.connect('http://localhost:11111');
 socket.on('connect', function(msg) {
@@ -30,6 +30,8 @@ window.onload=function(){
 }
 socket.on('md info init', function(initMdInfo) {
     mdInfo = initMdInfo;
+    var line = mdInfo['/home/nakatani/dddfs_md_mvmnt/traceA'];
+    log(mdInfoLine2mdInfoHash(line).ip);
     readyToReqNewMdInfo = true;
 });
 
