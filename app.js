@@ -73,6 +73,12 @@ var io = socketIO.listen(app);
 io.sockets.on('connection', function(socket) {
     log("[connection]");
 
+    // Process initial request for md info
+    socket.on('req md info init', function(client) {
+        log('[MD info Request from ' + client.sessionId + ']');
+        socket.emit('md info init', mdInfo);
+    });
+
     // Process request for md info
     socket.on('req md info', function(client) {
         log('[MD info Request from ' + client.sessionId + ']');

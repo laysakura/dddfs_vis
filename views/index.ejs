@@ -12,26 +12,44 @@ socket.on('connect', function(msg) {
 
 // ----------------------
 // Utility functions
-var logDiv;
+
+
+// Start-up
+var log = function() {};
+var readyToReqNewMdInfo = false;
+var mdInfo = {};
 window.onload=function(){
-    logDiv = document.getElementById("receiveMsg");
+    // Define log() function
+    log = function() {
+        console.log(arguments);
+        document.getElementById("receiveMsg").innerHTML+=arguments[0]+"<br />";
+    };
+
+    // Send inital message to the server
+    socket.emit('req md info init', {});
 }
-var log = function(){ console.log(arguments);logDiv.innerHTML+=arguments[0]+"<br />"; }
+socket.on('md info init', function(initMdInfo) {
+    mdInfo = initMdInfo;
+    readyToReqNewMdInfo = true;
+});
+
 
 
 // Polling MD info to server
 var pollingToServer = setInterval(function() {
-    socket.emit('req md info', { sessionId: socket.socket.transport.sessid });
+    if (readyToReqNewMdInfo == true) {
+        readyToReqNewMdInfo = false;
+        socket.emit('req md info', { sessionId: socket.socket.transport.sessid });
+    }
 }, 1000);
-
-
-// Receive MD info from server
-socket.on('md info', function(mdInfo) {
-    for (var fileName in mdInfo) {
+socket.on('md info', function(newMdInfo) {
+    mdInfo = newMdInfo;
+    for (var fileName in newMdInfo) {
         log('[Contents of ' + fileName + ']');
-        log(mdInfo[fileName]);
+        log(newMdInfo[fileName]);
         log('');
     }
+    readyToReqNewMdInfo = true;
 });
 
 </script>
