@@ -11,10 +11,7 @@ socket.on('connect', function(msg) {
 });
 
 // ----------------------
-// Requires
-// var md = require('/javascripts/metadata.js');
-
-
+// Utility functions
 var logDiv;
 window.onload=function(){
     logDiv = document.getElementById("receiveMsg");
@@ -24,12 +21,17 @@ var log = function(){ console.log(arguments);logDiv.innerHTML+=arguments[0]+"<br
 
 // Polling MD info to server
 var pollingToServer = setInterval(function() {
-    socket.emit('req md info', { value: socket.socket.transport.sessid });
+    socket.emit('req md info', { sessionId: socket.socket.transport.sessid });
 }, 1000);
+
 
 // Receive MD info from server
 socket.on('md info', function(mdInfo) {
-    log(mdInfo);
+    for (var fileName in mdInfo) {
+        log('[Contents of ' + fileName + ']');
+        log(mdInfo[fileName]);
+        log('');
+    }
 });
 
 </script>

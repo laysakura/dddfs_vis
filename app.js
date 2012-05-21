@@ -52,6 +52,7 @@ log ('[Traced Files]');
 log(md.tracedFiles);
 
 
+// Polling for metadata
 var mdInfo = {}; // This assosiative array is sent to clients
 var mdInfoPolling = setInterval(function() {
     md.tracedFiles.map(function(tracedFile) {
@@ -60,42 +61,25 @@ var mdInfoPolling = setInterval(function() {
             mdInfo[tracedFile] = data.toString();
         });
     });
-
-    // fs.readdir(mdDirPath, function (err, files) {
-    //     if (err) throw err;
-    //     mdInfo = files;
-    // });
 }, 1000);
 
 
-// ソケットを作る
+// Create socket listening to app
 var socketIO = require('socket.io');
-// クライアントの接続を待つ(IPアドレスとポート番号を結びつけます)
 var io = socketIO.listen(app);
 
-// クライアントが接続してきたときの処理
+
+// When a client connets to me:
 io.sockets.on('connection', function(socket) {
     log("[connection]");
 
-    // socket.on('message', function(data) {
-    //     // つながっているクライアント全員に送信
-    //     log("message");
-    //     io.sockets.emit('message', { value: data.value });
-    // });
-
-    // Request for md info
-    socket.on('req md info', function(data) {
-        log('[MD info Request from ' + data.value + ']');
-        log(mdInfo);
+    // Process request for md info
+    socket.on('req md info', function(client) {
+        log('[MD info Request from ' + client.sessionId + ']');
         socket.emit('md info', mdInfo);
-        // socket.emit('md info',
-        //             {
-        //                 'traceA': 'mikity-format',
-        //                 'traceB': 'mikity-format2',
-        //             });
     });
 
-    // クライアントが切断したときの処理
+    // When the client disconnects from me:
     socket.on('disconnect', function(){
         log("[disconnect]");
     });
