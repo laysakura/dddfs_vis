@@ -39,6 +39,19 @@ app.listen(8124, function(){
 
 // ===========================================
 
+var fs = require('fs');
+
+
+var mdInfo; // This value is sent to clients
+var mdInfoPolling = setInterval(function() {
+    var mdPath = '/home/nakatani/dddfs_md_mvmnt'
+    fs.readdir(mdPath, function (err, files) {
+        if (err) throw err;
+        mdInfo = files;
+    })
+}, 1000);
+
+
 // ソケットを作る
 var socketIO = require('socket.io');
 // クライアントの接続を待つ(IPアドレスとポート番号を結びつけます)
@@ -57,7 +70,7 @@ io.sockets.on('connection', function(socket) {
     // Request for md info
     socket.on('req md info', function(data) {
         console.log('[MD info Request from ' + data.value + ']');
-        socket.emit('md info', { value: 'mikity format' });
+        socket.emit('md info', { value: mdInfo });
     });
 
     // クライアントが切断したときの処理

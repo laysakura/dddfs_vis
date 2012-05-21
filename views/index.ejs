@@ -40,7 +40,7 @@ var log = function(){ console.log(arguments);logDiv.innerHTML+=arguments[0]+"<br
 
 
 // Polling MD info to server
-var pp = setInterval(function() {
+var pollingToServer = setInterval(function() {
     // log('[Sending from ' + socket.socket.transport.sessid + ']');
     // socket.emit('message', { value: 'ping from ' + socket.socket.transport.sessid });
     socket.emit('req md info', { value: socket.socket.transport.sessid });
