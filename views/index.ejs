@@ -21,11 +21,41 @@ var getNewMvmnt = function(newMdInfo, mdInfo) {
     //       or unlinked from metadata completely.
 
     for (var fileName in mdInfo) {
+        var newMdInfoLines = newMdInfo[fileName].split('\n');
+        var mdInfoLines = mdInfo[fileName].split('\n');
+
         // When need to remove (from 1 data node).
         // It is when lines in the mdInfo[fileName] are deleted
 
+
+
         // When need to make replication.
         // It is when lines in the mdInfo[fileName] are inserted
+        if (newMdInfoLines.length > mdInfoLines.length) {
+            newMdInfoLines.map(function(newMdInfoLine) {
+                var isNewMdInfoLineContained = false;
+                for (var i = 0; i < mdInfoLines.length; i++) {
+                    if (newMdInfoLine == mdInfoLines[i]) {
+                        isNewMdInfoLineContained = true;
+                    }
+                }
+                if (isNewMdInfoLineContained == false) {
+                    var replMdInfoHash = mdInfoLine2mdInfoHash(newMdInfoLine);
+                    if (replMdInfoHash != undefined) {
+                        var replSrcIp = replMdInfoHash['replSrcIp'];
+                        var replDestIp = replMdInfoHash['ip'];
+                        newMvmnt.push(
+                            {action: 'repl',
+                             srcCluster: iptable[replSrcIp]['cluster'],
+                             srcLocalId: iptable[replSrcIp]['localId'],
+                             destCluster: iptable[replDestIp]['cluster'],
+                             destLocalId: iptable[replDestIp]['localId'],
+                            }
+                        );
+                    }
+                }
+            });
+        }
     }
     return newMvmnt;
 };

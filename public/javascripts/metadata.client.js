@@ -15,8 +15,8 @@
 */
 var mdInfoLine2mdInfoHash = function(line) {
     var elems = line.split(',');
-    if (elems.length != 3) {
+    if (elems.length != 4) {
         return undefined;
     }
-    return {ip: elems[0], localPath: elems[1], size: elems[2]};
+    return {ip: elems[0], localPath: elems[1], size: elems[2], replSrcIp: elems[3]};
 };
