@@ -1,13 +1,13 @@
-int sizeX = 800;
-int sizeY = 800;
-int nodeX = 10;
-int nodeY = 20;
-int nodeGapX = 2;
-int nodeGapY = 3;
+int canvasWidth = 800;
+int canvasHeight = 800;
+int nodeWidth = 10;
+int nodeHeight = 20;
+int nodeGapWidth = 2;
+int nodeGapHeight = 3;
 
 
 void setup() {
-    size(sizeX, sizeY);
+    size(canvasWidth, canvasHeight);
     frameRate(24);
     background(0xffffff);
     // noFill();
@@ -17,46 +17,38 @@ void setup() {
 void draw() {
     background(0xffffff);
     drawClusters();
-
-    // camera(0, 0, 600,
-    //        150, 150, 150,
-    //        0.0, 1.0, 0.0);
-    // if (frameCount%90 == 0) {
-    //     seed = getSeed();
-    // }
-    // for (int j = 0; j < 100; j++) {
-    //     randomSeed(seed);
-    //     pushMatrix();
-    //     beginShape();
-    //     translate(150, 150, 150);
-    //     rotateY(j/TWO_PI/2);
-    //     rotateZ(j/TWO_PI/2);
-    //     rotateZ(frameCount/TWO_PI);
-    //     for (int i = 0; i < 20; i+=2) {
-    //         curveVertex(random(-i*10, i*10), random(-i*10, i*10), random(-i*10, i*10));
-    //     }
-    //     endShape();
-    //     popMatrix();
-    // }
 }
 
 void drawClusters() {
     for (var clusterName in clusterGeo) {
         var c = clusterGeo[clusterName];
-        var horizontalCenter = c['maxHorizontalNum'] / 2;
-        var verticalCenter = c['maxVerticalNum'] / 2;
         for (var iVertical = 0; iVertical <= c['maxVerticalNum']; iVertical++) {
             for (var iHorizontal = 0; iHorizontal <= c['maxHorizontalNum']; iHorizontal++) {
-                rect(sizeX * c['posX'] + (iHorizontal - horizontalCenter) * (nodeX + nodeGapX),
-                     sizeY * c['posY'] + (iVertical - verticalCenter) * (nodeY + nodeGapY),
-                     nodeX, nodeY);
+                HashMap nodePos = getNodePos(clusterName, iVertical*100 + iHorizontal);
+                rect(nodePos.get("x"),
+                     nodePos.get("y"),
+                     nodeWidth, nodeHeight);
             }
         }
     }
-
-    // var huscs = clusterGeo['huscs'];
-    // rect(sizeX * huscs['posX'], sizeY * huscs['posY'], 55, 55);
-
-    // var hongo = clusterGeo['hongo'];
-    // rect(sizeX * hongo['posX'], sizeY * hongo['posY'], 55, 55);
 }
+
+/*
+@parameter
+clusterName: 'huscs'
+localId: 1 (for '001')
+
+@returns
+{x: 30, y: 50}
+*/
+HashMap getNodePos(clusterName, localId) {
+    String c = clusterGeo[clusterName];
+    int horizontalCenter = c["maxHorizontalNum"] / 2;
+    int verticalCenter = c["maxVerticalNum"] / 2;
+    HashMap ret = new HashMap();
+    ret.put("x",
+            canvasWidth * c['posX'] + (localId%100 - horizontalCenter) * (nodeWidth + nodeGapWidth));
+    ret.put("y",
+            canvasHeight * c['posY'] + (int(localId/100) - verticalCenter) * (nodeHeight + nodeGapHeight));
+    return ret;
+};
