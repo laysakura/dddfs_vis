@@ -1,0 +1,5 @@
+{
+    "huscs": {"posX": 0.8, "posY": 0.1, "maxVerticalNum": 0, "maxHorizontalNum": 19},
+    "hongo": {"posX": 0.7, "posY": 0.6, "maxVerticalNum": 4, "maxHorizontalNum": 13},
+    "kyoto": {"posX": 0.3, "posY": 0.7, "maxVerticalNum": 1, "maxHorizontalNum": 21}
+}

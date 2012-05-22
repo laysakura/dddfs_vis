@@ -1,4 +1,5 @@
 <script src="/socket.io/socket.io.js"></script>
+<script src="/javascripts/processing-1.3.6.min.js"></script>
 <script src="/javascripts/metadata.client.js"></script>
 <script type="text/javascript">
 var socket = io.connect('http://localhost:11111');
@@ -18,6 +19,7 @@ socket.on('connect', function(msg) {
 var log = function() {};
 var readyToReqNewMdInfo = false;
 var iptable = {};
+var clusterGeo = {};
 var mdInfo = {};
 window.onload = function() {
     // Define log() function
@@ -28,12 +30,16 @@ window.onload = function() {
 
     // Send inital message to the server
     socket.emit('req iptable', {});
+    socket.emit('req cluster geo', {});
     socket.emit('req md info init', {});
 }
 socket.on('iptable', function(_iptable) {
     // Load table converting IP into ClusterHost
     iptable = _iptable;
-    // log(iptable['192.58.9.3']['cluster']);
+});
+socket.on('cluster geo', function(_clusterGeo) {
+    // Load cluster geometoric info
+    clusterGeo = _clusterGeo;
 });
 socket.on('md info init', function(initMdInfo) {
     // Get the initial file distribution
@@ -52,6 +58,7 @@ var pollingToServer = setInterval(function() {
 }, 1000);
 socket.on('md info', function(newMdInfo) {
     mdInfo = newMdInfo;
+    log('--------------------------------------');
     for (var fileName in newMdInfo) {
         log('[Contents of ' + fileName + ']');
         mdInfo[fileName].split('\n').map(function(mdInfoLine) {
@@ -74,4 +81,5 @@ socket.on('md info', function(newMdInfo) {
 <div id="connectId"></div>
 <div id="type"></div>
 <br>
+<canvas  data-processing-sources="/processing/dddfs_vis.pjs"></canvas>
 <div id="receiveMsg"></div>

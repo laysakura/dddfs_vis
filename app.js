@@ -88,6 +88,15 @@ io.sockets.on('connection', function(socket) {
         });
     });
 
+    // Process request for cluster geometoric info
+    socket.on('req cluster geo', function(client) {
+        log('[Cluster Geometoric info Request from ' + client.sessionId + ']');
+        fs.readFile('./public/json/cluster.geometory.json', 'utf8', function(err, data) {
+            if (err) throw err;
+            socket.emit('cluster geo', eval(JSON.parse(data)));
+        });
+    });
+
     // Process request for md info
     socket.on('req md info', function(client) {
         log('[MD info Request from ' + client.sessionId + ']');
