@@ -21,33 +21,69 @@ class Pos {
     }
 }
 
-// class File {
-//     String name;
+class File {
+    String name;
 
-//     // State
-//     boolean replicating, removing;
+    // State
+    boolean replicating, removing;
 
-//     // Current position
-//     Pos curPos;
-//     String curCluster;  // null on replicating
-//     int curLocalId;     // null on replicating
+    // Current position
+    Pos curPos;
+    String curCluster;  // null on replicating
+    int curLocalId;     // null on replicating
 
-//     // property for when making replica
-//     String srcCluster, destCluster;
-//     int srcLocalId, destLocalId;
+    // property for when making replica
+    String srcCluster, destCluster;
+    int srcLocalId, destLocalId;
 
-//     // Constructor for replica
-//     File(String _name,
-//          String _srcCluster, int _srcLocalId,
-//          String _destCluster, int _destLocalId) {
-//         replicating = true;
-//         name = name;
-//         srcCluster = _srcCluster;
-//         srcLocalId = _srcLocalId;
-//         destCluster = _destCluster;
-//         destLocalId = _destLocalId;
-//     }
-// }
+    // Constructor for replica
+    File(String _name,
+         String _srcCluster, int _srcLocalId,
+         String _destCluster, int _destLocalId) {
+        replicating = true;
+        removing = false;
+
+        name = _name;
+        srcCluster = _srcCluster;
+        srcLocalId = _srcLocalId;
+        destCluster = _destCluster;
+        destLocalId = _destLocalId;
+        curPos = getNodePos(srcCluster, srcLocalId);
+    }
+
+    // Constructor for static file
+    File(String _name,
+         String _curCluster, int _curLocalId) {
+        replicating = false;
+        removing = false;
+
+        name = _name;
+        curCluster = _curCluster;
+        curLocalId = _curLocalId;
+        curPos = getNodePos(curCluster, curLocalId);
+    }
+
+    // This function is supposed to be called every frame
+    void update() {
+        if (removing && replicating) {
+            // Assertion failed
+            triangle(30, 75, 58, 20, 86, 75);
+            exit();
+        }
+        if (removing) {
+        }
+        if (replicating) {
+            // if curPos reach to dest
+        }
+    }
+
+    boolean remove() {
+        if (replicating) {
+            return false;
+        }
+        removing = true;
+    }
+}
 
 
 // Main functions (setup/draw)
@@ -61,8 +97,6 @@ void setup() {
 void draw() {
     // background(0xffffff);
     drawClusters();
-    // TODO: Check if some movement has occrur
-    //       and make some animation
     drawFiles();
 }
 
