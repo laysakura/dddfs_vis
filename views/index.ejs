@@ -13,14 +13,32 @@ socket.on('connect', function(msg) {
 
 // ----------------------
 // Utility functions
+var getNewMvmnt = function(newMdInfo, mdInfo) {
+    var newMvmnt = [];
+
+    // TODO: Compare the length of mdInfo and newMdInfo
+    //       It's possible traced files are newly created
+    //       or unlinked from metadata completely.
+
+    for (var fileName in mdInfo) {
+        // When need to remove (from 1 data node).
+        // It is when lines in the mdInfo[fileName] are deleted
+
+        // When need to make replication.
+        // It is when lines in the mdInfo[fileName] are inserted
+    }
+    return newMvmnt;
+};
 
 
 // Start-up
 var log = function() {};
+var readyToInitFileList = false;
 var readyToReqNewMdInfo = false;
 var iptable = {};
 var clusterGeo = {};
 var mdInfo = {};
+var mvmntReqQ = [];
 window.onload = function() {
     // Define log() function
     log = function() {
@@ -29,22 +47,27 @@ window.onload = function() {
     };
 
     // Send inital message to the server
+    // The order must be:
+    // 1. iptable
+    // 2. cluster geo
+    // 3. md info init
     socket.emit('req iptable', {});
-    socket.emit('req cluster geo', {});
-    socket.emit('req md info init', {});
 }
 socket.on('iptable', function(_iptable) {
     // Load table converting IP into ClusterHost
     iptable = _iptable;
+    socket.emit('req cluster geo', {});
 });
 socket.on('cluster geo', function(_clusterGeo) {
     // Load cluster geometoric info
     clusterGeo = _clusterGeo;
+    socket.emit('req md info init', {});
 });
 socket.on('md info init', function(initMdInfo) {
     // Get the initial file distribution
     mdInfo = initMdInfo;
     readyToReqNewMdInfo = true;
+    readyToInitFileList = true;
 });
 
 
@@ -57,21 +80,25 @@ var pollingToServer = setInterval(function() {
     }
 }, 1000);
 socket.on('md info', function(newMdInfo) {
+    mvmntReqQ.push(getNewMvmnt(newMdInfo, mdInfo));
     mdInfo = newMdInfo;
-    log('--------------------------------------');
-    for (var fileName in newMdInfo) {
-        log('[Contents of ' + fileName + ']');
-        mdInfo[fileName].split('\n').map(function(mdInfoLine) {
-            var mdInfoHash = mdInfoLine2mdInfoHash(mdInfoLine);
-            if (mdInfoHash != undefined) {
-                var ip = mdInfoHash.ip;
-                log(ip + ' = ' + iptable[ip]['cluster'] + iptable[ip]['localId']);
-            }
-        });
 
-        // log(newMdInfo[fileName]);
-        log('');
-    }
+    // log('--------------------------------------');
+    // for (var fileName in newMdInfo) {
+    //     log('[Contents of ' + fileName + ']');
+    //     mdInfo[fileName].split('\n').map(function(mdInfoLine) {
+    //         var mdInfoHash = mdInfoLine2mdInfoHash(mdInfoLine);
+    //         if (mdInfoHash != undefined) {
+    //             var ip = mdInfoHash.ip;
+    //             log(ip + ' = ' + iptable[ip]['cluster'] + iptable[ip]['localId']);
+    //         }
+    //     });
+
+    //     // log(newMdInfo[fileName]);
+    //     log('');
+    // }
+
+
     readyToReqNewMdInfo = true;
 });
 

@@ -2,6 +2,11 @@
 Size canvasSize = new Size(800, 800);
 Size nodeSize = new Size(10, 20);
 Size nodeGapSize = new Size(2, 3);
+Size fileSize = new Size(5, 5);
+
+
+// Global variables
+ArrayList fileList = new ArrayList();
 
 
 // Classes
@@ -49,6 +54,8 @@ class File {
         destCluster = _destCluster;
         destLocalId = _destLocalId;
         curPos = getNodePos(srcCluster, srcLocalId);
+        curPos.x += int(nodeSize.width / 2);
+        curPos.y += int(nodeSize.height / 2);
     }
 
     // Constructor for static file
@@ -61,19 +68,24 @@ class File {
         curCluster = _curCluster;
         curLocalId = _curLocalId;
         curPos = getNodePos(curCluster, curLocalId);
+        curPos.x += int(nodeSize.width / 2);
+        curPos.y += int(nodeSize.height / 2);
     }
 
     // This function is supposed to be called every frame
-    void update() {
+    void updateAndDraw() {
         if (removing && replicating) {
             // Assertion failed
             triangle(30, 75, 58, 20, 86, 75);
             exit();
         }
-        if (removing) {
+        else if (removing) {
         }
-        if (replicating) {
+        else if (replicating) {
             // if curPos reach to dest
+        }
+        else {
+            ellipse(curPos.x, curPos.y, fileSize.width, fileSize.height);
         }
     }
 
@@ -95,6 +107,24 @@ void setup() {
     stroke(0x000000, 100);
 }
 void draw() {
+    // initialize fileList only 1 time in browser
+    if (readyToInitFileList == true) {
+        for (var tracedFileName in mdInfo) {
+            var tracedFileContents = mdInfo[tracedFileName];
+            tracedFileContents.split('\n').map(function(line) {
+                var mdInfoHash = mdInfoLine2mdInfoHash(line);
+                if (mdInfoHash != undefined) {
+                    var ip = mdInfoHash['ip'];
+                    fileList.add(new File(tracedFileName,
+                                          iptable[ip]['cluster'],
+                                          iptable[ip]['localId']));
+                }
+
+            });
+        }
+        readyToInitFileList = false;
+    }
+
     // background(0xffffff);
     drawClusters();
     drawFiles();
@@ -117,7 +147,9 @@ void drawClusters() {
 }
 
 void drawFiles() {
-    
+    for (int i = 0; i < fileList.size(); i++) {
+        fileList.get(i).updateAndDraw();
+    }
 }
 
 /*

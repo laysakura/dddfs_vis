@@ -57,6 +57,7 @@ var mdInfo = {}; // This assosiative array is sent to clients
 var mdInfoPolling = setInterval(function() {
     md.tracedFiles.map(function(tracedFile) {
         fs.readFile(tracedFile, 'utf8', function(err, data) {
+            // TODO: deal with the situation where trace[ABC] is not exsits
             if (err) throw err;
             mdInfo[tracedFile] = data;
         });
