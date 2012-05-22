@@ -101,7 +101,8 @@ void draw() {
 }
 
 
-// Utility functions
+// Draw functions
+// They are supposed to be called every frame
 void drawClusters() {
     for (var clusterName in clusterGeo) {
         var c = clusterGeo[clusterName];
