@@ -45,7 +45,7 @@ var getNewMvmnt = function(newMdInfo, mdInfo) {
                         var replSrcIp = replMdInfoHash['replSrcIp'];
                         var replDestIp = replMdInfoHash['ip'];
                         newMvmnt.push(
-                            {action: 'repl',
+                            {action: 'repl', name: fileName,
                              srcCluster: iptable[replSrcIp]['cluster'],
                              srcLocalId: iptable[replSrcIp]['localId'],
                              destCluster: iptable[replDestIp]['cluster'],
@@ -57,6 +57,7 @@ var getNewMvmnt = function(newMdInfo, mdInfo) {
             });
         }
     }
+    log(newMvmnt);
     return newMvmnt;
 };
 
@@ -104,13 +105,17 @@ socket.on('md info init', function(initMdInfo) {
 
 // Polling MD info to server
 var pollingToServer = setInterval(function() {
+    log(mvmntReqQ.length);
     if (readyToReqNewMdInfo == true) {
         readyToReqNewMdInfo = false;
         socket.emit('req md info', { sessionId: socket.socket.transport.sessid });
     }
 }, 1000);
 socket.on('md info', function(newMdInfo) {
-    mvmntReqQ.push(getNewMvmnt(newMdInfo, mdInfo));
+    var newMvmnt = getNewMvmnt(newMdInfo, mdInfo);
+    if (newMvmnt.length > 0) {
+        mvmntReqQ = mvmntReqQ.concat(newMvmnt);
+    }
     mdInfo = newMdInfo;
 
     // log('--------------------------------------');

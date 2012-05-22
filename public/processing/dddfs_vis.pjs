@@ -3,6 +3,7 @@ Size canvasSize = new Size(800, 800);
 Size nodeSize = new Size(10, 20);
 Size nodeGapSize = new Size(2, 3);
 Size fileSize = new Size(5, 5);
+float speed = 10.0;
 
 
 // Global variables
@@ -38,8 +39,12 @@ class File {
     int curLocalId;     // null on replicating
 
     // property for when making replica
-    String srcCluster, destCluster;
-    int srcLocalId, destLocalId;
+    Pos srcPos;
+    String srcCluster;
+    int srcLocalId;
+    Pos destPos;
+    String destCluster;
+    int destLocalId;
 
     // Constructor for replica
     File(String _name,
@@ -49,13 +54,22 @@ class File {
         removing = false;
 
         name = _name;
+        curCluster = null;
+        curLocalId = -1;
         srcCluster = _srcCluster;
         srcLocalId = _srcLocalId;
         destCluster = _destCluster;
         destLocalId = _destLocalId;
-        curPos = getNodePos(srcCluster, srcLocalId);
-        curPos.x += int(nodeSize.width / 2);
-        curPos.y += int(nodeSize.height / 2);
+
+        srcPos = getNodePos(srcCluster, srcLocalId);
+        srcPos.x += int(nodeSize.width / 2);
+        srcPos.y += int(nodeSize.height / 2);
+
+        curPos = srcPos;
+
+        destPos = getNodePos(destCluster, destLocalId);
+        destPos.x += int(nodeSize.width / 2);
+        destPos.y += int(nodeSize.height / 2);
     }
 
     // Constructor for static file
@@ -65,11 +79,20 @@ class File {
         removing = false;
 
         name = _name;
+
         curCluster = _curCluster;
         curLocalId = _curLocalId;
+        srcCluster = null;
+        srcLocalId = -1;
+        destCluster = null;
+        destLocalId = -1;
+
         curPos = getNodePos(curCluster, curLocalId);
         curPos.x += int(nodeSize.width / 2);
         curPos.y += int(nodeSize.height / 2);
+
+        srcPos = null;
+        destPos = null;
     }
 
     // This function is supposed to be called every frame
@@ -82,6 +105,24 @@ class File {
         else if (removing) {
         }
         else if (replicating) {
+            // curPos = destPos;
+            // srcPos = null;
+            // destPos = null;
+            // replicating = false;
+
+            float norm = distance(destPos, srcPos);
+            curPos.x += float(destPos.x - srcPos.x) * speed / norm;
+            curPos.y += float(destPos.y - srcPos.y) * speed / norm;
+            // When curPos overruns destPos
+            if (distance(destPos, curPos) <= speed) {
+                text('HEEEEEEEEEEEEEE', 100, 100);
+                curPos = destPos;
+                srcPos = destPos = null;
+                replicating = false;
+            }
+            ellipse(curPos.x, curPos.y, fileSize.width, fileSize.height);
+
+
             // if curPos reach to dest
         }
         else {
@@ -109,25 +150,42 @@ void setup() {
 void draw() {
     // initialize fileList only 1 time in browser
     if (readyToInitFileList == true) {
-        for (var tracedFileName in mdInfo) {
-            var tracedFileContents = mdInfo[tracedFileName];
-            tracedFileContents.split('\n').map(function(line) {
-                var mdInfoHash = mdInfoLine2mdInfoHash(line);
-                if (mdInfoHash != undefined) {
-                    var ip = mdInfoHash['ip'];
-                    fileList.add(new File(tracedFileName,
-                                          iptable[ip]['cluster'],
-                                          iptable[ip]['localId']));
-                }
-
-            });
-        }
+        initializeFileList();
         readyToInitFileList = false;
     }
 
     // background(0xffffff);
+    updateFileList();
     drawClusters();
     drawFiles();
+}
+
+
+// File list update
+void initializeFileList() {
+    for (var tracedFileName in mdInfo) {
+        var tracedFileContents = mdInfo[tracedFileName];
+        tracedFileContents.split('\n').map(function(line) {
+            var mdInfoHash = mdInfoLine2mdInfoHash(line);
+            if (mdInfoHash != undefined) {
+                var ip = mdInfoHash['ip'];
+                fileList.add(new File(tracedFileName,
+                                      iptable[ip]['cluster'],
+                                      iptable[ip]['localId']));
+            }
+        });
+    }
+}
+// Process movement requests
+void updateFileList() {
+    for (var i = 0; i < mvmntReqQ.length; i++) {
+        var mvmntReq = mvmntReqQ.pop();
+        if (mvmntReq['action'] == 'repl') {
+            fileList.add(new File(mvmntReq['name'],
+                                  mvmntReq['srcCluster'], mvmntReq['srcLocalId'],
+                                  mvmntReq['destCluster'], mvmntReq['destLocalId']));
+        }
+    }
 }
 
 
@@ -150,6 +208,10 @@ void drawFiles() {
     for (int i = 0; i < fileList.size(); i++) {
         fileList.get(i).updateAndDraw();
     }
+}
+
+float distance(Pos a, Pos b) {
+    return sqrt((a.x - b.x)*(a.x - b.x) + (a.y - b.y)*(a.y - b.y));
 }
 
 /*
