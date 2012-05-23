@@ -1,9 +1,10 @@
 // Config
-Size canvasSize = new Size(800, 800);
+Size canvasSize = new Size(800, 600);
 Size nodeSize = new Size(10, 20);
 Size nodeGapSize = new Size(2, 3);
 Size fileSize = new Size(5, 5);
-float speed = 10.0;
+float replSpeed = 10.0;
+float brightSpeed = 10;
 colorMode(RGB, 255);
 color strokeColor = color(0, 0, 0, 0);
 color backgroundColor = color(150, 200, 255);
@@ -36,7 +37,10 @@ class File {
     String name;
 
     // State
-    boolean replicating, removing;
+    boolean replicationStarting, replicating, removing;
+
+    // brightness (0-255)
+    int brightness;
 
     // Current position
     Pos curPos;
@@ -55,8 +59,11 @@ class File {
     File(String _name,
          String _srcCluster, int _srcLocalId,
          String _destCluster, int _destLocalId) {
-        replicating = true;
+        replicationStarting = true;
+        replicating = false;
         removing = false;
+
+        brightness = 0;
 
         name = _name;
         curCluster = null;
@@ -80,8 +87,11 @@ class File {
     // Constructor for static file
     File(String _name,
          String _curCluster, int _curLocalId) {
+        replicationStarting = false;
         replicating = false;
         removing = false;
+
+        brightness = 0;
 
         name = _name;
 
@@ -109,6 +119,26 @@ class File {
         }
         else if (removing) {
         }
+        else if (replicationStarting) {
+            // Flush the file
+            if (0 <= brightness && brightness <= 255) {
+                brightness += brightSpeed;
+                // Draw start position
+                fill(getColorForFile(name));
+                stroke(strokeColor);
+                ellipse(curPos.x, curPos.y, fileSize.width, fileSize.height);
+                // Draw brightness
+                fill(255, 255, 64, brightness);
+                noStroke(strokeColor);
+                ellipse(curPos.x, curPos.y, fileSize.width + 3, fileSize.height + 3);
+            } else if (255 < brightness) {
+                brightness = 0;
+                replicationStarting = false;
+                replicating = true;
+            } else {
+                println("Brightness assertion failed!");
+            }
+        }
         else if (replicating) {
             // Overwrite previous position
             fill(backgroundColor);;
@@ -117,20 +147,20 @@ class File {
             stroke(strokeColor);
 
             float norm = distance(destPos, srcPos);
-            curPos.x += float(destPos.x - srcPos.x) * speed / norm;
-            curPos.y += float(destPos.y - srcPos.y) * speed / norm;
+            curPos.x += float(destPos.x - srcPos.x) * replSpeed / norm;
+            curPos.y += float(destPos.y - srcPos.y) * replSpeed / norm;
             // When curPos overruns destPos
-            if (distance(destPos, curPos) <= speed) {
+            if (distance(destPos, curPos) <= replSpeed) {
                 curPos = destPos;
                 srcPos = destPos = null;
                 replicating = false;
             }
             // Draw new position
-            fill(getColorForStr(name));
+            fill(getColorForFile(name));
             ellipse(curPos.x, curPos.y, fileSize.width, fileSize.height);
         }
         else {
-            fill(getColorForStr(name));
+            fill(getColorForFile(name));
             ellipse(curPos.x, curPos.y, fileSize.width, fileSize.height);
         }
     }
@@ -195,6 +225,7 @@ void updateFileList() {
 // They are supposed to be called every frame
 void drawClusters() {
     fill(nodeColor);
+    stroke(strokeColor);
     for (var clusterName in clusterGeo) {
         var c = clusterGeo[clusterName];
         for (var iVertical = 0; iVertical <= c['maxVerticalNum']; iVertical++) {
@@ -242,8 +273,8 @@ int encodeStr(String s) {
     else println("Unexpected trace file name!!");
 }
 
-color getColorForStr(String s) {
-    int code = encodeStr(s);
+color getColorForFile(String fileName) {
+    int code = encodeStr(fileName);
     if (code == 1) return color(255, 128, 128, 255);       // traceA -> Red
     else if (code == 2) return color(128, 255, 128, 255);  // traceB -> Green
     else if (code == 3) return color(128, 128, 255, 255);  // traceC -> Blue
