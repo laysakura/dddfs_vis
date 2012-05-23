@@ -1,8 +1,8 @@
 // Config
-Size canvasSize = new Size(800, 600);
-Size nodeSize = new Size(10, 20);
+Size canvasSize = new Size(1000, 700);
+Size nodeSize = new Size(15, 30);
 Size nodeGapSize = new Size(2, 3);
-Size fileSize = new Size(5, 5);
+Size fileSize = new Size(10, 10);
 float replSpeed = 10.0;
 float brightSpeed = 10;
 float fadeoutSpeed = 10;
@@ -77,12 +77,24 @@ class File {
         srcPos = getNodePos(srcCluster, srcLocalId);
         srcPos.x += int(nodeSize.width / 2);
         srcPos.y += int(nodeSize.height / 2);
+        if (name.charAt(name.length() - 1) == "A") {
+            srcPos.y -= int(nodeSize.height / 3);
+        } else if (name.charAt(name.length() - 1) == "B") {
+        } else if (name.charAt(name.length() - 1) == "C") {
+            srcPos.y += int(nodeSize.height / 3);
+        }
 
         curPos = srcPos;
 
         destPos = getNodePos(destCluster, destLocalId);
         destPos.x += int(nodeSize.width / 2);
         destPos.y += int(nodeSize.height / 2);
+        if (name.charAt(name.length() - 1) == "A") {
+            destPos.y -= int(nodeSize.height / 3);
+        } else if (name.charAt(name.length() - 1) == "B") {
+        } else if (name.charAt(name.length() - 1) == "C") {
+            destPos.y += int(nodeSize.height / 3);
+        }
     }
 
     // Constructor for static file
@@ -106,6 +118,12 @@ class File {
         curPos = getNodePos(curCluster, curLocalId);
         curPos.x += int(nodeSize.width / 2);
         curPos.y += int(nodeSize.height / 2);
+        if (name.charAt(name.length() - 1) == "A") {
+            curPos.y -= int(nodeSize.height / 3);
+        } else if (name.charAt(name.length() - 1) == "B") {
+        } else if (name.charAt(name.length() - 1) == "C") {
+            curPos.y += int(nodeSize.height / 3);
+        }
 
         srcPos = null;
         destPos = null;
