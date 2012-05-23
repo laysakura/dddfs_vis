@@ -26,9 +26,28 @@ var getNewMvmnt = function(newMdInfo, mdInfo) {
 
         // When need to remove (from 1 data node).
         // It is when lines in the mdInfo[fileName] are deleted
-
-
-
+        if (newMdInfoLines.length < mdInfoLines.length) {
+            mdInfoLines.map(function(mdInfoLine) {
+                var isMdInfoLineContained = false;
+                for (var i = 0; i < newMdInfoLines.length; i++) {
+                    if (mdInfoLine == newMdInfoLines[i]) {
+                        isMdInfoLineContained = true;
+                    }
+                }
+                if (isMdInfoLineContained == false) {
+                    var rmMdInfoHash = mdInfoLine2mdInfoHash(mdInfoLine);
+                    if (rmMdInfoHash != undefined) {
+                        var ip = rmMdInfoHash['ip'];
+                        newMvmnt.push(
+                            {action: 'rm', name: fileName,
+                             cluster: iptable[ip]['cluster'],
+                             localId: iptable[ip]['localId'],
+                            }
+                        );
+                    }
+                }
+            });
+        }
         // When need to make replication.
         // It is when lines in the mdInfo[fileName] are inserted
         if (newMdInfoLines.length > mdInfoLines.length) {

@@ -5,6 +5,7 @@ Size nodeGapSize = new Size(2, 3);
 Size fileSize = new Size(5, 5);
 float replSpeed = 10.0;
 float brightSpeed = 10;
+float fadeoutSpeed = 10;
 colorMode(RGB, 255);
 color strokeColor = color(0, 0, 0, 0);
 color backgroundColor = color(150, 200, 255);
@@ -117,8 +118,11 @@ class File {
             triangle(30, 75, 58, 20, 86, 75);
             exit();
         }
-        else if (removing) {
-        }
+        // Removing cannot be supported since
+        // files are eliminated from fileList
+        // soon after action=rm is digested
+        // else if (removing) {
+        // }
         else if (replicationStarting) {
             // Flush the file
             if (0 <= brightness && brightness <= 255) {
@@ -170,6 +174,7 @@ class File {
             return false;
         }
         removing = true;
+        return true;
     }
 }
 
@@ -210,12 +215,28 @@ void initializeFileList() {
 }
 // Process movement requests
 void updateFileList() {
+    fill(backgroundColor);
+    rect(0, 0, 30, 30);
+    fill(0);
+    text(fileList.size(), 10, 10);
     for (var i = 0; i < mvmntReqQ.length; i++) {
         var mvmntReq = mvmntReqQ.pop();
         if (mvmntReq['action'] == 'repl') {
             fileList.add(new File(mvmntReq['name'],
                                   mvmntReq['srcCluster'], mvmntReq['srcLocalId'],
                                   mvmntReq['destCluster'], mvmntReq['destLocalId']));
+        }
+        else if (mvmntReq['action'] == 'rm') {
+            for (int i = 0; i < fileList.size(); i++) {
+                if (fileList.get(i).name == mvmntReq['name'] &&
+                    fileList.get(i).curCluster == mvmntReq['cluster'] &&
+                    fileList.get(i).curLocalId == mvmntReq['localId']) {
+                    if (fileList.get(i).remove()) {
+                        fileList.remove(i);
+                    }
+                    break;
+                }
+            }
         }
     }
 }
