@@ -5,6 +5,7 @@
     "192.58.9.5": {"cluster": "hongo", "localId": "204"},
     "192.58.9.6": {"cluster": "hongo", "localId": "206"},
     "192.58.9.8": {"cluster": "hongo", "localId": "100"},
+    "192.58.9.9": {"cluster": "hongo", "localId": "400"},
 
     "192.34.9.12": {"cluster": "kyoto", "localId": "003"},
     "192.34.9.15": {"cluster": "kyoto", "localId": "005"},

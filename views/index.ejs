@@ -57,7 +57,6 @@ var getNewMvmnt = function(newMdInfo, mdInfo) {
             });
         }
     }
-    log(newMvmnt);
     return newMvmnt;
 };
 
@@ -105,7 +104,6 @@ socket.on('md info init', function(initMdInfo) {
 
 // Polling MD info to server
 var pollingToServer = setInterval(function() {
-    log(mvmntReqQ.length);
     if (readyToReqNewMdInfo == true) {
         readyToReqNewMdInfo = false;
         socket.emit('req md info', { sessionId: socket.socket.transport.sessid });
