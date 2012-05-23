@@ -68,15 +68,15 @@ var polling = setInterval(function() {
         var cmd = 'sqlite3 ' + md.replicaConnDb +
             ' "SELECT data_node, num_access FROM access_table WHERE trace_file=\'' +
             tracedFile + '\';"';
-        log(cmd);
-        child_process.exec(cmd, function(error, stdout, stderr) {
-            if (error !== null) {
-                log('exec error: ' + error);
-            }
-            log(stdout);
-            log(stderr);
-        });
-    });
+        // log(cmd);
+        // child_process.exec(cmd, function(error, stdout, stderr) {
+        //     if (error !== null) {
+        //         log('exec error: ' + error);
+        //     }
+        //     log(stdout);
+        //     log(stderr);
+        // }); 
+   });
 }, 1000);
 
 
