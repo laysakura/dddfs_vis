@@ -38,12 +38,16 @@ app.listen(8124, function(){
 
 
 // ===========================================
+// Config
+var appDirPath = '/home/nakatani/dddfs_vis';
+
+
 // Utility functions
 var log = console.log;
 
 
 // Requires
-var md = require('./public/javascripts/metadata.server.js');
+var md = require(appDirPath + '/public/javascripts/metadata.server.js');
 var fs = require('fs');
 var child_process = require('child_process');
 
@@ -98,7 +102,7 @@ io.sockets.on('connection', function(socket) {
     // Process request for iptable
     socket.on('req iptable', function(client) {
         log('[Iptable Request from ' + client.sessionId + ']');
-        fs.readFile('./public/json/iptable.json', 'utf8', function(err, data) {
+        fs.readFile(appDirPath + '/public/json/iptable.json', 'utf8', function(err, data) {
             if (err) throw err;
             socket.emit('iptable', eval(JSON.parse(data)));
         });
@@ -107,7 +111,7 @@ io.sockets.on('connection', function(socket) {
     // Process request for cluster geometoric info
     socket.on('req cluster geo', function(client) {
         log('[Cluster Geometoric info Request from ' + client.sessionId + ']');
-        fs.readFile('./public/json/cluster.geometory.json', 'utf8', function(err, data) {
+        fs.readFile(appDirPath + '/public/json/cluster.geometory.json', 'utf8', function(err, data) {
             if (err) throw err;
             socket.emit('cluster geo', eval(JSON.parse(data)));
         });

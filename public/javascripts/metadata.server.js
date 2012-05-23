@@ -1,5 +1,5 @@
-exports.replicaConnDb = '/home/nakatani/dddfs_db/replica.sqlite'
-var mdDirPath = '/data/local2/mikity/meta'
+exports.replicaConnDb = '/home/nakatani/dddfs_db/replica.sqlite';
+var mdDirPath = '/data/local2/mikity/meta';
 exports.tracedFiles = [
     'traceA',
     'traceB',
