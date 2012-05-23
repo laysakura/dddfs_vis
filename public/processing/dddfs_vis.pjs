@@ -125,6 +125,7 @@ class File {
                 srcPos = destPos = null;
                 replicating = false;
             }
+            // Draw new position
             fill(getColorForStr(name));
             ellipse(curPos.x, curPos.y, fileSize.width, fileSize.height);
         }
