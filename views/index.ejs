@@ -88,6 +88,7 @@ var iptable = {};
 var clusterGeo = {};
 var mdInfo = {};
 var mvmntReqQ = [];
+var replConn = {};
 window.onload = function() {
     // Define log() function
     log = function() {
@@ -126,6 +127,7 @@ var pollingToServer = setInterval(function() {
     if (readyToReqNewMdInfo == true) {
         readyToReqNewMdInfo = false;
         socket.emit('req md info', { sessionId: socket.socket.transport.sessid });
+        socket.emit('req repl conn', { sessionId: socket.socket.transport.sessid });
     }
 }, 1000);
 socket.on('md info', function(newMdInfo) {
@@ -152,6 +154,9 @@ socket.on('md info', function(newMdInfo) {
 
 
     readyToReqNewMdInfo = true;
+});
+socket.on('repl conn', function(_replConn) {
+    replConn = _replConn;
 });
 
 </script>

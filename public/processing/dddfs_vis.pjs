@@ -279,6 +279,7 @@ void drawClusters() {
 
 void drawFiles() {
     for (int i = 0; i < fileList.size(); i++) {
+        // fileList.get(i).tellNumConnAndDraw();
         fileList.get(i).updateAndDraw();
     }
 }
