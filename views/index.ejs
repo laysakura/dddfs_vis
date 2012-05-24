@@ -19,6 +19,7 @@ function debugPerSec() {
     // log(parseInt("001"));  // 1
     // log(parseInt(1));  // 1
     // [].map(function(){}); // OK
+    // log(getNumAccessOfReplica('traceA', '192.34.9.120'));
 }
 
 
@@ -45,6 +46,18 @@ function getNumAccessOfNode(ip) {
     return ret;
 }
 
+
+function getNumAccessOfReplica(fname, ip) {
+    if (replConn.length == 0) return 0;
+
+    var ret = 0;
+    replConn.map(function(record) {
+        if (record['file'] == fname && record['ip'] == ip) {
+            ret = record['nConn'];
+        }
+    });
+    return ret;
+}
 
 var getNewMvmnt = function(newMdInfo, mdInfo) {
     var newMvmnt = [];

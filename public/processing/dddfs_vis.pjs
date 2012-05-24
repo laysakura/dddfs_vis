@@ -10,6 +10,12 @@ colorMode(RGB, 255);
 color strokeColor = color(0, 0, 0, 0);
 color backgroundColor = color(150, 200, 255);
 color nodeColor = color(255, 255, 255);
+color traceAColor = color(255, 128, 128, 255);
+color traceBColor = color(128, 255, 128, 255);
+color traceCColor = color(128, 128, 255, 255);
+color busyNodeColor = color(255, 64, 64);
+color busyReplicaColor = color(255, 0, 0);
+color freeReplicaColor = color(0, 0, 255);
 
 
 // Global variables
@@ -56,6 +62,11 @@ class File {
     String destCluster;
     int destLocalId;
 
+    // Connection count
+    int prevNumConn = -1;
+    boolean numConnIncreasing, numConnDecreasing;
+    int brightnessOnNumConnChanging;
+
     // Constructor for replica
     File(String _name,
          String _srcCluster, int _srcLocalId,
@@ -63,8 +74,13 @@ class File {
         replicationStarting = true;
         replicating = false;
         removing = false;
+        numConnIncreasing = false;
+        numConnDecreasing = false;
+        prevNumConn == -1;
 
         brightness = 0;
+        brightnessOnNumConnIncreasing = 0;
+        brightnessOnNumConnDecreasing = 0;
 
         name = _name;
         curCluster = null;
@@ -103,8 +119,12 @@ class File {
         replicationStarting = false;
         replicating = false;
         removing = false;
+        numConnChanging = false
+        prevNumConn == -1;
 
         brightness = 0;
+        brightnessOnNumConnIncreasing = 0;
+        brightnessOnNumConnDecreasing = 0;
 
         name = _name;
 
@@ -155,8 +175,72 @@ class File {
                 ellipse(curPos.x, curPos.y, fileSize.width + 3, fileSize.height + 3);
             } else if (255 < brightness) {
                 brightness = 0;
+                brightnessOnNumConnIncreasing = 0;
+                brightnessOnNumConnDecreasing = 0;
                 replicationStarting = false;
                 replicating = true;
+
+                fill(backgroundColor);
+                noStroke(strokeColor);
+                ellipse(curPos.x, curPos.y, fileSize.width + 3, fileSize.height + 3);
+            } else {
+                println("Brightness assertion failed!");
+            }
+        }
+        else if (numConnIncreasing) {
+            brightness = 0;
+            numConn = false;
+            brightnessOnNumConnDecreasing = 0;
+
+            // Flush the file
+            if (0 <= brightnessOnNumConnIncreasing && brightnessOnNumConnIncreasing <= 255) {
+                brightnessOnNumConnIncreasing += brightSpeed;
+                // Draw start position
+                fill(getColorForFile(name));
+                stroke(strokeColor);
+                ellipse(curPos.x, curPos.y, fileSize.width, fileSize.height);
+                // Draw brightness
+                fill(busyReplicaColor, brightnessOnNumConnIncreasing);
+                noStroke(strokeColor);
+                ellipse(curPos.x, curPos.y, fileSize.width + 3, fileSize.height + 3);
+            } else if (255 < brightnessOnNumConnIncreasing) {
+                brightness = 0;
+                brightnessOnNumConnIncreasing = 0;
+                brightnessOnNumConnDecreasing = 0;
+                numConnIncreasing = false;
+
+                fill(backgroundColor);
+                noStroke(strokeColor);
+                ellipse(curPos.x, curPos.y, fileSize.width + 3, fileSize.height + 3);
+            } else {
+                println("Brightness assertion failed!");
+            }
+        }
+        else if (numConnDecreasing) {
+            brightness = 0;
+            numConnIncreasing = false;
+            brightnessOnNumConnIncreasing = 0;
+
+            // Flush the file
+            if (0 <= brightnessOnNumConnDecreasing && brightnessOnNumConnDecreasing <= 255) {
+                brightnessOnNumConnDecreasing += brightSpeed;
+                // Draw start position
+                fill(getColorForFile(name));
+                stroke(strokeColor);
+                ellipse(curPos.x, curPos.y, fileSize.width, fileSize.height);
+                // Draw brightness
+                fill(freeReplicaColor, brightnessOnNumConnDecreasing);
+                noStroke(strokeColor);
+                ellipse(curPos.x, curPos.y, fileSize.width + 3, fileSize.height + 3);
+            } else if (255 < brightnessOnNumConnDecreasing) {
+                brightness = 0;
+                brightnessOnNumConnIncreasing = 0;
+                brightnessOnNumConnDecreasing = 0;
+                numConnDecreasing = false;
+
+                fill(backgroundColor);
+                noStroke(strokeColor);
+                ellipse(curPos.x, curPos.y, fileSize.width + 3, fileSize.height + 3);
             } else {
                 println("Brightness assertion failed!");
             }
@@ -178,13 +262,27 @@ class File {
                 replicating = false;
             }
             // Draw new position
+            stroke(strokeColor);
             fill(getColorForFile(name));
             ellipse(curPos.x, curPos.y, fileSize.width, fileSize.height);
         }
         else {
+            stroke(strokeColor);
             fill(getColorForFile(name));
             ellipse(curPos.x, curPos.y, fileSize.width, fileSize.height);
         }
+    }
+
+    void tellNumConn(int numConn) {
+        if (prevNumConn > numConn) {
+            // println('hetta');
+            numConnDecreasing = true;
+        }
+        else if (prevNumConn < numConn) {
+            // println('fueta');
+            numConnIncreasing = true;
+        }
+        prevNumConn = numConn;
     }
 
     boolean remove() {
@@ -275,12 +373,10 @@ void drawClusters() {
         }
 
         var access = getNumAccessOfNode(ip);
-        if (access == 0) {
-            fill(nodeColor);
-        }
-        else {
-            fill(color(128, 128, 0));
-        }
+        fill(nodeColor);
+        rect(nodePos.x, nodePos.y,
+             nodeSize.width, nodeSize.height);
+        fill(color(busyNodeColor, 255 * access / 10));
         rect(nodePos.x, nodePos.y,
              nodeSize.width, nodeSize.height);
     }
@@ -288,7 +384,13 @@ void drawClusters() {
 
 void drawFiles() {
     for (int i = 0; i < fileList.size(); i++) {
-        // fileList.get(i).tellNumConnAndDraw();
+        String fname = fileList.get(i).name;
+        String ip = node2ip(fileList.get(i).curCluster, fileList.get(i).curLocalId);
+        int numConn = getNumAccessOfReplica(fname, ip);
+        if (abs(numConn - fileList.get(i).prevNumConn) > 0 || fileList.get(i).prevNumConn == -1) {
+            fileList.get(i).tellNumConn(numConn);
+        }
+
         fileList.get(i).updateAndDraw();
     }
 }
@@ -324,7 +426,7 @@ int encodeStr(String s) {
 
 color getColorForFile(String fileName) {
     int code = encodeStr(fileName);
-    if (code == 1) return color(255, 128, 128, 255);       // traceA -> Red
-    else if (code == 2) return color(128, 255, 128, 255);  // traceB -> Green
-    else if (code == 3) return color(128, 128, 255, 255);  // traceC -> Blue
+    if (code == 1) return traceAColor;       // traceA -> Red
+    else if (code == 2) return traceBColor;  // traceB -> Green
+    else if (code == 3) return traceCColor;  // traceC -> Blue
 }
