@@ -13,7 +13,8 @@ color nodeColor = color(255, 255, 255);
 color traceAColor = color(255, 128, 128, 255);
 color traceBColor = color(128, 255, 128, 255);
 color traceCColor = color(128, 128, 255, 255);
-color busyNodeColor = color(255, 64, 64);
+color replBrightColor = color(255, 255, 64);
+color busyNodeColor = color(255, 128, 64);
 color busyReplicaColor = color(255, 0, 0);
 color freeReplicaColor = color(0, 0, 255);
 
@@ -170,7 +171,7 @@ class File {
                 stroke(strokeColor);
                 ellipse(curPos.x, curPos.y, fileSize.width, fileSize.height);
                 // Draw brightness
-                fill(255, 255, 64, brightness);
+                fill(replBrightColor, brightness);
                 noStroke(strokeColor);
                 ellipse(curPos.x, curPos.y, fileSize.width + 3, fileSize.height + 3);
             } else if (255 < brightness) {
