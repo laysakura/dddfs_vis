@@ -62,7 +62,7 @@ var replConn = {}; // This assosiative array is sent to clients
 var polling = setInterval(function() {
     md.tracedFiles.map(function(tracedFile) {
         // Read the contents of tracedFile and push into mdInfo
-        fs.readFile(tracedFile, 'utf8', function(err, data) {
+        fs.readFile(md.mdDirPath + '/' + tracedFile, 'utf8', function(err, data) {
             // TODO: deal with the situation where trace[ABC] is not exsits
             if (err) throw err;
             mdInfo[tracedFile] = data;
@@ -70,16 +70,16 @@ var polling = setInterval(function() {
 
         // Read the connection count from DB
         var cmd = 'sqlite3 ' + md.replicaConnDb +
-            ' "SELECT data_node, num_access FROM access_table WHERE trace_file=\'' +
+            ' "SELECT data_node, num_access FROM access_table WHERE trace_file like \'%' +
             tracedFile + '\';"';
-        // log(cmd);
-        // child_process.exec(cmd, function(error, stdout, stderr) {
-        //     if (error !== null) {
-        //         log('exec error: ' + error);
-        //     }
-        //     log(stdout);
-        //     log(stderr);
-        // }); 
+        log(cmd);
+        child_process.exec(cmd, function(error, stdout, stderr) {
+            if (error !== null) {
+                log('exec error: ' + error);
+            }
+            log(stdout);
+            log(stderr);
+        });
    });
 }, 1000);
 
