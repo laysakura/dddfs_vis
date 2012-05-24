@@ -136,27 +136,13 @@ socket.on('md info', function(newMdInfo) {
         mvmntReqQ = mvmntReqQ.concat(newMvmnt);
     }
     mdInfo = newMdInfo;
-
-    // log('--------------------------------------');
-    // for (var fileName in newMdInfo) {
-    //     log('[Contents of ' + fileName + ']');
-    //     mdInfo[fileName].split('\n').map(function(mdInfoLine) {
-    //         var mdInfoHash = mdInfoLine2mdInfoHash(mdInfoLine);
-    //         if (mdInfoHash != undefined) {
-    //             var ip = mdInfoHash.ip;
-    //             log(ip + ' = ' + iptable[ip]['cluster'] + iptable[ip]['localId']);
-    //         }
-    //     });
-
-    //     // log(newMdInfo[fileName]);
-    //     log('');
-    // }
-
-
     readyToReqNewMdInfo = true;
 });
 socket.on('repl conn', function(_replConn) {
-    replConn = _replConn;
+    if (_replConn != null && _replConn != undefined && _replConn.length > 0) {
+        replConn = _replConn;
+        log(replConn);
+    }
 });
 
 </script>

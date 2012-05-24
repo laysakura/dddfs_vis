@@ -44,6 +44,24 @@ var appDirPath = '/home/nakatani/dddfs_vis';
 
 // Utility functions
 var log = console.log;
+var getReplConn = function(sqliteOutput) {
+    if (sqliteOutput == undefined) return [];
+
+    var ret = [];
+    records = sqliteOutput.split('\n');
+    records.map(function(record) {
+        if (record != '') {
+            var col = record.split('|');
+            var tracedFileSplitByPath = col[0].split('/');
+            ret.push({
+                file: tracedFileSplitByPath.pop(),
+                ip: col[1],
+                nConn: parseInt(col[2]),
+            });
+        }
+    });
+    return ret;
+}
 
 
 // Requires
@@ -58,29 +76,24 @@ log(md.tracedFiles);
 
 // Polling for metadata and replConn
 var mdInfo = {}; // This assosiative array is sent to clients
-var replConn = {}; // This assosiative array is sent to clients
+var replConn = []; // This array is sent to clients
 var polling = setInterval(function() {
+    // Read the contents of tracedFile and push into mdInfo
     md.tracedFiles.map(function(tracedFile) {
-        // Read the contents of tracedFile and push into mdInfo
         fs.readFile(md.mdDirPath + '/' + tracedFile, 'utf8', function(err, data) {
             // TODO: deal with the situation where trace[ABC] is not exsits
             if (err) throw err;
             mdInfo[tracedFile] = data;
         });
-
-        // Read the connection count from DB
-        var cmd = 'sqlite3 ' + md.replicaConnDb +
-            ' "SELECT data_node, num_access FROM access_table WHERE trace_file like \'%' +
-            tracedFile + '\';"';
-        log(cmd);
-        child_process.exec(cmd, function(error, stdout, stderr) {
-            if (error !== null) {
-                log('exec error: ' + error);
-            }
-            log(stdout);
-            log(stderr);
-        });
    });
+
+    // Read the connection count from DB
+    var cmd = 'sqlite3 ' + md.replicaConnDb +
+        ' "SELECT * FROM access_table;"';
+    child_process.exec(cmd, function(err, stdout, stderr) {
+        if (err) throw err;
+        replConn = getReplConn(stdout);
+    });
 }, 1000);
 
 
