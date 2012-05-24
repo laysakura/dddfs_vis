@@ -77,7 +77,7 @@ class File {
         removing = false;
         numConnIncreasing = false;
         numConnDecreasing = false;
-        prevNumConn == -1;
+        prevNumConn = -2;
 
         brightness = 0;
         brightnessOnNumConnIncreasing = 0;
@@ -162,36 +162,10 @@ class File {
         // soon after action=rm is digested
         // else if (removing) {
         // }
-        else if (replicationStarting) {
-            // Flush the file
-            if (0 <= brightness && brightness <= 255) {
-                brightness += brightSpeed;
-                // Draw start position
-                fill(getColorForFile(name));
-                stroke(strokeColor);
-                ellipse(curPos.x, curPos.y, fileSize.width, fileSize.height);
-                // Draw brightness
-                fill(replBrightColor, brightness);
-                noStroke(strokeColor);
-                ellipse(curPos.x, curPos.y, fileSize.width + 3, fileSize.height + 3);
-            } else if (255 < brightness) {
-                brightness = 0;
-                brightnessOnNumConnIncreasing = 0;
-                brightnessOnNumConnDecreasing = 0;
-                replicationStarting = false;
-                replicating = true;
-
-                fill(backgroundColor);
-                noStroke(strokeColor);
-                ellipse(curPos.x, curPos.y, fileSize.width + 3, fileSize.height + 3);
-            } else {
-                println("Brightness assertion failed!");
-            }
-        }
         else if (numConnIncreasing) {
             brightness = 0;
-            numConn = false;
             brightnessOnNumConnDecreasing = 0;
+            numConnDecreasing = false;
 
             // Flush the file
             if (0 <= brightnessOnNumConnIncreasing && brightnessOnNumConnIncreasing <= 255) {
@@ -219,8 +193,8 @@ class File {
         }
         else if (numConnDecreasing) {
             brightness = 0;
-            numConnIncreasing = false;
             brightnessOnNumConnIncreasing = 0;
+            numConnIncreasing = false;
 
             // Flush the file
             if (0 <= brightnessOnNumConnDecreasing && brightnessOnNumConnDecreasing <= 255) {
@@ -246,6 +220,32 @@ class File {
                 println("Brightness assertion failed!");
             }
         }
+        else if (replicationStarting) {
+            // Flush the file
+            if (0 <= brightness && brightness <= 255) {
+                brightness += brightSpeed;
+                // Draw start position
+                fill(getColorForFile(name));
+                stroke(strokeColor);
+                ellipse(curPos.x, curPos.y, fileSize.width, fileSize.height);
+                // Draw brightness
+                fill(replBrightColor, brightness);
+                noStroke(strokeColor);
+                ellipse(curPos.x, curPos.y, fileSize.width + 3, fileSize.height + 3);
+            } else if (255 < brightness) {
+                brightness = 0;
+                brightnessOnNumConnIncreasing = 0;
+                brightnessOnNumConnDecreasing = 0;
+                replicationStarting = false;
+                replicating = true;
+
+                fill(backgroundColor);
+                noStroke(strokeColor);
+                ellipse(curPos.x, curPos.y, fileSize.width + 3, fileSize.height + 3);
+            } else {
+                println("Brightness assertion failed!");
+            }
+        }
         else if (replicating) {
             // Overwrite previous position
             fill(backgroundColor);;
@@ -258,6 +258,10 @@ class File {
             curPos.y += float(destPos.y - srcPos.y) * replSpeed / norm;
             // When curPos overruns destPos
             if (distance(destPos, curPos) <= replSpeed) {
+                curCluster = destCluster;
+                curLocalId = destLocalId;
+                destCluster = srcCluster = null;
+                destLocalId = srcLocalId = null;
                 curPos = destPos;
                 srcPos = destPos = null;
                 replicating = false;
@@ -279,8 +283,8 @@ class File {
             // println('hetta');
             numConnDecreasing = true;
         }
-        else if (prevNumConn < numConn) {
-            // println('fueta');
+        else if (prevNumConn < numConn && prevNumConn >= 0) {
+            // println('prevNumConn=' + prevNumConn + ', numConn=' + numConn);
             numConnIncreasing = true;
         }
         prevNumConn = numConn;
@@ -304,7 +308,15 @@ void setup() {
     stroke(strokeColor);
 }
 void draw() {
+    // PImage img; // PImage for preloading
+    // PImage part; // PImage for display
+    // img = requestImage("/japan_map.png"); // accepted formats are .jpg, .gif, and .png
+    // part = img.get(); // get all pixels from the image
+    // image(part, 20, 20); // display the image at x, y coordinates
+
+    // background(backgroundColor);
     // initialize fileList only 1 time in browser
+
     if (readyToInitFileList == true) {
         initializeFileList();
         readyToInitFileList = false;
@@ -377,7 +389,7 @@ void drawClusters() {
         fill(nodeColor);
         rect(nodePos.x, nodePos.y,
              nodeSize.width, nodeSize.height);
-        fill(color(busyNodeColor, 255 * access / 10));
+        fill(color(busyNodeColor, 255 * access / 5));
         rect(nodePos.x, nodePos.y,
              nodeSize.width, nodeSize.height);
     }
@@ -385,11 +397,25 @@ void drawClusters() {
 
 void drawFiles() {
     for (int i = 0; i < fileList.size(); i++) {
+        fill(backgroundColor);
+        noStroke(strokeColor);
+        ellipse(fileList.get(i).curPos.x, fileList.get(i).curPos.y, fileSize.width + 3, fileSize.height + 3);
+
         String fname = fileList.get(i).name;
-        String ip = node2ip(fileList.get(i).curCluster, fileList.get(i).curLocalId);
-        int numConn = getNumAccessOfReplica(fname, ip);
-        if (abs(numConn - fileList.get(i).prevNumConn) > 0 || fileList.get(i).prevNumConn == -1) {
-            fileList.get(i).tellNumConn(numConn);
+
+        if (fileList.get(i).replicating == false) {
+
+            // debug
+            // if (fileList.get(i).curCluster == null || fileList.get(i).curCluster == "") {
+            //     println(fname + ":" + fileList.get(i).curCluster + fileList.get(i).localId);
+            // }
+
+
+            String ip = node2ip(fileList.get(i).curCluster, fileList.get(i).curLocalId);
+            int numConn = getNumAccessOfReplica(fname, ip);
+            if (abs(numConn - fileList.get(i).prevNumConn) > 0 || fileList.get(i).prevNumConn < 0) {
+                fileList.get(i).tellNumConn(numConn);
+            }
         }
 
         fileList.get(i).updateAndDraw();
