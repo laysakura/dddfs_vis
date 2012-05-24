@@ -211,7 +211,9 @@ void draw() {
         readyToInitFileList = false;
     }
     updateFileList();
-    drawClusters();
+    if (iptableReady == true && clusterGeoReady == true) {
+        drawClusters();
+    }
     drawFiles();
 }
 
@@ -263,17 +265,24 @@ void updateFileList() {
 // Draw functions
 // They are supposed to be called every frame
 void drawClusters() {
-    fill(nodeColor);
+    // Draw clusters which exists in iptable
     stroke(strokeColor);
-    for (var clusterName in clusterGeo) {
-        var c = clusterGeo[clusterName];
-        for (var iVertical = 0; iVertical <= c['maxVerticalNum']; iVertical++) {
-            for (var iHorizontal = 0; iHorizontal <= c['maxHorizontalNum']; iHorizontal++) {
-                Pos nodePos = getNodePos(clusterName, iVertical*100 + iHorizontal);
-                rect(nodePos.x, nodePos.y,
-                     nodeSize.width, nodeSize.height);
-            }
+    for (var ip in iptable) {
+        var cluster = iptable[ip]['cluster'];
+        var localId = parseInt(iptable[ip]['localId']);
+        if (cluster.length > 0) {
+            Pos nodePos = getNodePos(cluster, localId);
         }
+
+        var access = getNumAccessOfNode(ip);
+        if (access == 0) {
+            fill(nodeColor);
+        }
+        else {
+            fill(color(128, 128, 0));
+        }
+        rect(nodePos.x, nodePos.y,
+             nodeSize.width, nodeSize.height);
     }
 }
 

@@ -5,14 +5,47 @@
 var socket = io.connect('http://localhost:11111');
 socket.on('connect', function(msg) {
   console.log("connet");
-  document.getElementById("connectId").innerHTML = 
-    "あなたの接続ID::" + socket.socket.transport.sessid;
-  document.getElementById("type").innerHTML = 
-    "接続方式::" + socket.socket.transport.name;
+  // document.getElementById("connectId").innerHTML = 
+  //   "あなたの接続ID::" + socket.socket.transport.sessid;
+  // document.getElementById("type").innerHTML = 
+  //   "接続方式::" + socket.socket.transport.name;
 });
 
 // ----------------------
 // Utility functions
+function debugPerSec() {
+    // log(node2ip("huscs", "001"));  // OK
+    // log(node2ip("huscs", "001"));  // OK
+    // log(parseInt("001"));  // 1
+    // log(parseInt(1));  // 1
+    // [].map(function(){}); // OK
+}
+
+
+function node2ip(cluster, localId) {
+    for (var ip in iptable) {
+        if (iptable[ip]['cluster'] == cluster &&
+            parseInt(iptable[ip]['localId']) == parseInt(localId)) {
+            return ip;
+        }
+    }
+    log("Invalid node -> ip");
+}
+
+
+function getNumAccessOfNode(ip) {
+    if (replConn.length == 0) return 0;
+
+    var ret = 0;
+    replConn.map(function(record) {
+        if (record['ip'] == ip) {
+            ret += record['nConn'];
+        }
+    });
+    return ret;
+}
+
+
 var getNewMvmnt = function(newMdInfo, mdInfo) {
     var newMvmnt = [];
 
@@ -82,13 +115,15 @@ var getNewMvmnt = function(newMdInfo, mdInfo) {
 
 // Start-up
 var log = function() {};
+var iptableReady = false;
+var clusterGeoReady = false;
 var readyToInitFileList = false;
 var readyToReqNewMdInfo = false;
 var iptable = {};
 var clusterGeo = {};
 var mdInfo = {};
 var mvmntReqQ = [];
-var replConn = {};
+var replConn = [];
 window.onload = function() {
     // Define log() function
     log = function() {
@@ -106,11 +141,13 @@ window.onload = function() {
 socket.on('iptable', function(_iptable) {
     // Load table converting IP into ClusterHost
     iptable = _iptable;
+    iptableReady = true;
     socket.emit('req cluster geo', {});
 });
 socket.on('cluster geo', function(_clusterGeo) {
     // Load cluster geometoric info
     clusterGeo = _clusterGeo;
+    clusterGeoReady = true;
     socket.emit('req md info init', {});
 });
 socket.on('md info init', function(initMdInfo) {
@@ -124,6 +161,8 @@ socket.on('md info init', function(initMdInfo) {
 
 // Polling MD info to server
 var pollingToServer = setInterval(function() {
+    debugPerSec();
+
     if (readyToReqNewMdInfo == true) {
         readyToReqNewMdInfo = false;
         socket.emit('req md info', { sessionId: socket.socket.transport.sessid });
@@ -141,14 +180,10 @@ socket.on('md info', function(newMdInfo) {
 socket.on('repl conn', function(_replConn) {
     if (_replConn != null && _replConn != undefined && _replConn.length > 0) {
         replConn = _replConn;
-        log(replConn);
     }
 });
 
 </script>
 
-<div id="connectId"></div>
-<div id="type"></div>
-<br>
 <canvas  data-processing-sources="/processing/dddfs_vis.pjs"></canvas>
 <div id="receiveMsg"></div>

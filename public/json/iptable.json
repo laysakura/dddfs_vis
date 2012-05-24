@@ -63,5 +63,9 @@
     "192.34.9.12": {"cluster": "kyoto", "localId": "003"},
     "192.34.9.15": {"cluster": "kyoto", "localId": "005"},
     "192.34.9.120": {"cluster": "kyoto", "localId": "007"},
-    "192.34.9.122": {"cluster": "kyoto", "localId": "010"}
+    "192.34.9.122": {"cluster": "kyoto", "localId": "010"},
+
+
+    "192.58.9.9": {"cluster": "kyoto", "localId": "012"},
+    "192.58.9.3": {"cluster": "kyoto", "localId": "001"}
 }
