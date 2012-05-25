@@ -49,7 +49,7 @@ class File {
     boolean replicationStarting, replicating, removing;
 
     // Speed
-    replSpeed = -1.0;
+    float replSpeed = -1.0;
 
     // brightness (0-255)
     int brightness;
