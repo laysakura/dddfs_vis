@@ -48,6 +48,9 @@ class File {
     // State
     boolean replicationStarting, replicating, removing;
 
+    // Speed
+    replSpeed = -1.0;
+
     // brightness (0-255)
     int brightness;
 
@@ -255,7 +258,9 @@ class File {
             stroke(strokeColor);
 
             float norm = distance(destPos, srcPos);
-            float replSpeed = float(norm) / float(replTime);
+            if (replSpeed < 0.0) {
+                replSpeed = float(norm) / float(replTime);
+            }
             println(replSpeed);
             curPos.x += float(destPos.x - srcPos.x) * replSpeed / norm;
             curPos.y += float(destPos.y - srcPos.y) * replSpeed / norm;
@@ -268,6 +273,7 @@ class File {
                 curPos = destPos;
                 srcPos = destPos = null;
                 replicating = false;
+                replSpeed = -1.0;
             }
             // Draw new position
             stroke(strokeColor);
