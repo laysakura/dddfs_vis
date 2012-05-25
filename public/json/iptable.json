@@ -1,6 +1,6 @@
 {
     "133.50.19.5": {"cluster": "huscs", "localId": "000", "visibility": "disabled"},
-    "133.50.19.6": {"cluster": "huscs", "localId": "001", "visibility": "disabled"},
+    "133.50.19.6": {"cluster": "huscs", "localId": "001", "visibility": "mds"},
     "133.50.19.7": {"cluster": "huscs", "localId": "002", "visibility": "visible"},
     "133.50.19.8": {"cluster": "huscs", "localId": "003", "visibility": "visible"},
     "133.50.19.9": {"cluster": "huscs", "localId": "004", "visibility": "visible"},

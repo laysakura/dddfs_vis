@@ -10,6 +10,7 @@ colorMode(RGB, 255);
 color strokeColor = color(0, 0, 0, 0);
 color backgroundColor = color(150, 200, 255);
 color nodeColor = color(255, 255, 255);
+color mdsNodeColor = color(227, 128, 255);
 color disabledNodeColor = color(128, 128, 128);
 color traceAColor = color(255, 128, 128, 255);
 color traceBColor = color(128, 255, 128, 255);
@@ -355,10 +356,10 @@ void initializeFileList() {
 }
 // Process movement requests
 void updateFileList() {
-    fill(backgroundColor);
-    rect(0, 0, 30, 30);
-    fill(0);
-    text(fileList.size(), 10, 10);
+    // fill(backgroundColor);
+    // rect(0, 0, 30, 30);
+    // fill(0);
+    // text(fileList.size(), 10, 10);
     for (var i = 0; i < mvmntReqQ.length; i++) {
         var mvmntReq = mvmntReqQ.pop();
         if (mvmntReq['action'] == 'repl') {
@@ -401,6 +402,11 @@ void drawClusters() {
 
         if (visibility == 'disabled') {
             fill(disabledNodeColor);
+            rect(nodePos.x, nodePos.y,
+                 nodeSize.width, nodeSize.height);
+        }
+        else if (visibility == 'mds') {
+            fill(mdsNodeColor);
             rect(nodePos.x, nodePos.y,
                  nodeSize.width, nodeSize.height);
         }
