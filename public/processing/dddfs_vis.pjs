@@ -256,6 +256,7 @@ class File {
 
             float norm = distance(destPos, srcPos);
             float replSpeed = float(norm) / float(replTime);
+            println(replSpeed);
             curPos.x += float(destPos.x - srcPos.x) * replSpeed / norm;
             curPos.y += float(destPos.y - srcPos.y) * replSpeed / norm;
             // When curPos overruns destPos
