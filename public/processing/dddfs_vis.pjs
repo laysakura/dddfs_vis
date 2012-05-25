@@ -1,8 +1,8 @@
 // Config
 Size canvasSize = new Size(1000, 700);
-Size nodeSize = new Size(15, 30);
+Size nodeSize = new Size(25, 40);
 Size nodeGapSize = new Size(2, 3);
-Size fileSize = new Size(10, 10);
+Size fileSize = new Size(15, 15);
 float replSpeed = 10.0;
 float brightSpeed = 10;
 float fadeoutSpeed = 10;
