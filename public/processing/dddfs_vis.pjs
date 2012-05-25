@@ -10,6 +10,7 @@ colorMode(RGB, 255);
 color strokeColor = color(0, 0, 0, 0);
 color backgroundColor = color(150, 200, 255);
 color nodeColor = color(255, 255, 255);
+color disabledNodeColor = color(128, 128, 128);
 color traceAColor = color(255, 128, 128, 255);
 color traceBColor = color(128, 255, 128, 255);
 color traceCColor = color(128, 128, 255, 255);
@@ -379,19 +380,31 @@ void drawClusters() {
     // Draw clusters which exists in iptable
     stroke(strokeColor);
     for (var ip in iptable) {
+        var visibility = iptable[ip]['visibility'];
+        if (visibility == 'invisible') {
+            continue;
+        }
+
         var cluster = iptable[ip]['cluster'];
         var localId = parseInt(iptable[ip]['localId']);
         if (cluster.length > 0) {
             Pos nodePos = getNodePos(cluster, localId);
         }
 
-        var access = getNumAccessOfNode(ip);
-        fill(nodeColor);
-        rect(nodePos.x, nodePos.y,
-             nodeSize.width, nodeSize.height);
-        fill(color(busyNodeColor, 255 * access / 5));
-        rect(nodePos.x, nodePos.y,
-             nodeSize.width, nodeSize.height);
+        if (visibility == 'disabled') {
+            fill(disabledNodeColor);
+            rect(nodePos.x, nodePos.y,
+                 nodeSize.width, nodeSize.height);
+        }
+        else {
+            var access = getNumAccessOfNode(ip);
+            fill(nodeColor);
+            rect(nodePos.x, nodePos.y,
+                 nodeSize.width, nodeSize.height);
+            fill(color(busyNodeColor, 255 * access / 5));
+            rect(nodePos.x, nodePos.y,
+                 nodeSize.width, nodeSize.height);
+        }
     }
 }
 
