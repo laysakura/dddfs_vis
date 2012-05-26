@@ -1,4 +1,7 @@
 // Config
+PFont myFont = createFont("FFScala", 22);
+color clusterNameColor = color(0, 0, 0);
+
 Size canvasSize = new Size(1000, 700);
 Size nodeSize = new Size(25, 40);
 Size nodeGapSize = new Size(2, 3);
@@ -334,6 +337,7 @@ void draw() {
     updateFileList();
     if (iptableReady == true && clusterGeoReady == true) {
         drawClusters();
+        drawClustersName();
     }
     drawFiles();
 }
@@ -415,11 +419,19 @@ void drawClusters() {
             fill(nodeColor);
             rect(nodePos.x, nodePos.y,
                  nodeSize.width, nodeSize.height);
-            fill(color(busyNodeColor, 255 * access / 5));
+            fill(color(busyNodeColor, 255 * access / 3));
             rect(nodePos.x, nodePos.y,
                  nodeSize.width, nodeSize.height);
         }
     }
+}
+
+void drawClustersName() {
+    fill(clusterNameColor);
+    textFont(myFont);
+    text("Hokkaido", 645, 145);
+    text("Tokyo", 625, 530);
+    text("Kyoto", 80, 580);
 }
 
 void drawFiles() {

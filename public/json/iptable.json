@@ -64,7 +64,7 @@
     "192.58.9.11": {"cluster": "kyoto", "localId": "001", "visibility": "visible"},
     "192.58.9.12": {"cluster": "kyoto", "localId": "002", "visibility": "visible"},
     "192.58.9.13": {"cluster": "kyoto", "localId": "003", "visibility": "visible"},
-    "192.58.9.14": {"cluster": "kyoto", "localId": "004", "visibility": "disabled"},
+    "192.58.9.14": {"cluster": "kyoto", "localId": "004", "visibility": "visible"},
     "192.58.9.15": {"cluster": "kyoto", "localId": "005", "visibility": "visible"},
     "192.58.9.16": {"cluster": "kyoto", "localId": "006", "visibility": "disabled"},
     "192.58.9.17": {"cluster": "kyoto", "localId": "007", "visibility": "disabled"},
